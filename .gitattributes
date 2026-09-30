@@ -1,0 +1,10 @@
+# Normalize line endings so Windows, macOS and Linux teammates don't fight over them
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.jar binary
+*.png binary
+*.jpg binary
+*.ico binary
