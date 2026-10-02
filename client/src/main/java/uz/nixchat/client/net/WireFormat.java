@@ -6,7 +6,8 @@ import uz.nixchat.common.model.message.SystemMessage;
 import uz.nixchat.common.model.message.TextMessage;
 
 /**
- * Converts between {@link Message} objects and the current text wire format {@code "username: text"}.
+ * Reads frames from the server. The client sends plain text; the server adds the verified sender:
+ * {@code "username: text"}. Frames without that prefix ("alice joined the chat") are system notices.
  * Will be replaced by JSON once the protocol is finalised.
  */
 public final class WireFormat {
@@ -14,10 +15,6 @@ public final class WireFormat {
     private static final String SEPARATOR = ": ";
 
     private WireFormat() {
-    }
-
-    public static String encode(TextMessage message) {
-        return message.getSender().getUsername() + SEPARATOR + message.getText();
     }
 
     /** Turns a raw frame from the server into a message; anything unrecognised becomes a system notice. */

@@ -7,6 +7,23 @@ spring:
   threads:
     virtual:
       enabled: true
+  datasource:
+    # Matches docker-compose.yml; override with environment variables in production
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/nixchat}
+    username: ${DB_USER:nixchat}
+    password: ${DB_PASSWORD:nixchat}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none # the schema is created by Flyway migrations
+  flyway:
+    enabled: true
+
+nixchat:
+  jwt:
+    # Development only! Set JWT_SECRET (at least 32 characters) on any real server.
+    secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}
+    ttl: 7d
 
 management:
   endpoints:

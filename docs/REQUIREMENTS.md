@@ -65,7 +65,7 @@ Also: `User.equals()` / `hashCode()` / `toString()`, `MessageCell.updateItem()`,
 3. `URISyntaxException` — `NixChatApp.connect()`: invalid server address
 4. `GeneralSecurityException` — `FileMessageStorage.decodeLine()`: wrong key or tampered cache
 
-**Custom exception** — `InsufficientFundsException` (checked) in the Wallet department: `WalletService.transfer()` throws it when the balance is too low.
+**Custom exceptions** — `InsufficientFundsException` (checked) in the Wallet department: `WalletService.transfer()` throws it when the balance is too low. `AuthException` (checked) in the client: `ApiClient` throws it when the server refuses a login or registration. On the server, `UsernameTakenException` and `InvalidCredentialsException` become HTTP 409 and 401.
 
 **One try-catch with multiple catches and finally** — `FileMessageStorage.load()`:
 `catch (NoSuchFileException)` → `catch (IOException)` → `catch (RuntimeException)` → `finally` (prints load statistics).
@@ -96,11 +96,13 @@ uz.nixchat.common.model.chat      Chat, PrivateChat, GroupChat                  
 uz.nixchat.common.crypto          Encryptor, AesGcmEncryptor, NoOpEncryptor
 uz.nixchat.common.storage         MessageStorage, InMemoryMessageStorage
 uz.nixchat.client                 NixChatApp (main package of the client)
-uz.nixchat.client.net             ChatConnection, WireFormat                        ← subpackage
+uz.nixchat.client.net             ChatConnection, WireFormat, ApiClient, AuthException                        ← subpackage
 uz.nixchat.client.storage         AppSettings, Contact, ContactStore, FileMessageStorage
-uz.nixchat.client.ui              ChatView, MessageCell, ContactCell
+uz.nixchat.client.ui              LoginView, ChatView, MessageCell, ContactCell
 uz.nixchat.server                 NixChatServerApplication
-uz.nixchat.server.ws              WebSocketConfig, ChatWebSocketHandler             ← subpackage
+uz.nixchat.server.ws              WebSocketConfig, ChatWebSocketHandler, JwtHandshakeInterceptor  ← subpackage
+uz.nixchat.server.auth            UserAccount, AuthService, TokenService, AuthController
+uz.nixchat.server.config          SecurityConfig, JwtProperties
 ```
 
 **Cross-package method calls** (from `uz.nixchat.client.NixChatApp`):
@@ -127,4 +129,4 @@ NixCoin is a virtual currency with no real-money value.
 
 ## Tests
 
-`./gradlew test` — 32 unit tests: message types, chats and roles, encryption, local files, departments, wallet, music, games, store.
+`./gradlew test` — 32 unit tests: message types, chats and roles, encryption, local files, departments, wallet, music, games, store; plus server tests for registration, login and tokens.

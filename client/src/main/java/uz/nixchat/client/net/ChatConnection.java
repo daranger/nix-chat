@@ -14,12 +14,14 @@ import java.util.function.Consumer;
 public class ChatConnection {
 
     private final URI uri;
+    private final String token;
     private final Consumer<String> onMessage;
     private final Consumer<String> onStatus;
     private volatile WebSocket socket;
 
-    public ChatConnection(URI uri, Consumer<String> onMessage, Consumer<String> onStatus) {
+    public ChatConnection(URI uri, String token, Consumer<String> onMessage, Consumer<String> onStatus) {
         this.uri = uri;
+        this.token = token;
         this.onMessage = onMessage;
         this.onStatus = onStatus;
     }
@@ -28,6 +30,7 @@ public class ChatConnection {
         onStatus.accept("Connecting…");
         HttpClient.newHttpClient()
                 .newWebSocketBuilder()
+                .header("Authorization", "Bearer " + token)
                 .buildAsync(uri, new Listener())
                 .whenComplete((ws, error) -> {
                     if (error != null) {

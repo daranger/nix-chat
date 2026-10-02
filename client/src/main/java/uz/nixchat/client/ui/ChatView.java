@@ -29,17 +29,17 @@ public class ChatView extends BorderPane {
     private final ListView<Contact> contacts = new ListView<>();
     private final Label status = new Label();
 
-    public ChatView(User currentUser, String chatTitle, Consumer<String> onSend) {
+    public ChatView(User currentUser, String chatTitle, Consumer<String> onSend, Runnable onSignOut) {
         feed.setCellFactory(list -> new MessageCell(currentUser));
         contacts.setCellFactory(list -> new ContactCell());
 
-        setTop(buildHeader(currentUser, chatTitle));
+        setTop(buildHeader(currentUser, chatTitle, onSignOut));
         setLeft(buildSidebar());
         setCenter(feed);
         setBottom(buildInputBar(onSend));
     }
 
-    private HBox buildHeader(User currentUser, String chatTitle) {
+    private HBox buildHeader(User currentUser, String chatTitle, Runnable onSignOut) {
         Label title = new Label(chatTitle);
         title.getStyleClass().add("title-3");
         Label me = new Label(currentUser.toString());
@@ -48,7 +48,11 @@ public class ChatView extends BorderPane {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox header = new HBox(12, title, me, spacer, status);
+        Button signOut = new Button("Sign out");
+        signOut.getStyleClass().add("flat");
+        signOut.setOnAction(event -> onSignOut.run());
+
+        HBox header = new HBox(12, title, me, spacer, status, signOut);
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPadding(new Insets(12));
         return header;

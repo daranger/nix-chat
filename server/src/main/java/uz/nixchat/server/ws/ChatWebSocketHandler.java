@@ -15,8 +15,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * First milestone: a single shared room. Every text message is broadcast to all connected clients.
- * Will be replaced by per-chat routing, authentication and persistence.
+ * The shared room. Only logged-in users get here (see {@link JwtHandshakeInterceptor});
+ * the server puts the verified username in front of every message, so nobody can impersonate anyone.
+ * Wire format to clients: {@code "username: text"}; service notices have no prefix.
  */
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
@@ -32,7 +33,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         // The decorator makes concurrent sends to one session thread-safe
         sessions.put(session.getId(),
                 new ConcurrentWebSocketSessionDecorator(session, SEND_TIME_LIMIT_MS, BUFFER_SIZE_LIMIT));
-        log.info("Client connected: {} (online: {})", session.getId(), sessions.size());
+        log.info("{} connected (online: {})", username(session), sessions.size());
+        broadcast(new TextMessage(username(session) + " joined the chat"));
     }
 
     @Override
@@ -41,13 +43,19 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         if (text.isEmpty() || text.length() > Protocol.MAX_MESSAGE_LENGTH) {
             return;
         }
-        broadcast(new TextMessage(text));
+        broadcast(new TextMessage(username(session) + ": " + text));
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        sessions.remove(session.getId());
-        log.info("Client disconnected: {} (online: {})", session.getId(), sessions.size());
+        if (sessions.remove(session.getId()) != null) {
+            log.info("{} disconnected (online: {})", username(session), sessions.size());
+            broadcast(new TextMessage(username(session) + " left the chat"));
+        }
+    }
+
+    private static String username(WebSocketSession session) {
+        return String.valueOf(session.getAttributes().get(JwtHandshakeInterceptor.USERNAME_ATTRIBUTE));
     }
 
     private void broadcast(TextMessage message) {

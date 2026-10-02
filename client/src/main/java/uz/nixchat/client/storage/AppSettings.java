@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * File 1 of 3: user settings, stored in {@code settings.properties}.
- * Entity: the current {@link User} plus connection and encryption preferences.
+ * Entity: the current {@link User} plus connection, login and encryption preferences.
  */
 public class AppSettings {
 
@@ -30,6 +30,7 @@ public class AppSettings {
     private static final String KEY_PORT = "server.port";
     private static final String KEY_CACHE_ENCRYPTED = "cache.encrypted";
     private static final String KEY_CACHE_KEY = "cache.key";
+    private static final String KEY_AUTH_TOKEN = "auth.token";
 
     private final Path file;
     private final Properties properties = new Properties();
@@ -103,6 +104,30 @@ public class AppSettings {
 
     public User getCurrentUser() {
         return new User(properties.getProperty(KEY_USERNAME), properties.getProperty(KEY_DISPLAY_NAME));
+    }
+
+    /** Remembers who is signed in on this profile (after a successful login). */
+    public void setCurrentUser(String username, String displayName) {
+        properties.setProperty(KEY_USERNAME, username);
+        if (displayName == null || displayName.isBlank()) {
+            properties.remove(KEY_DISPLAY_NAME);
+        } else {
+            properties.setProperty(KEY_DISPLAY_NAME, displayName);
+        }
+    }
+
+    /** The saved login token, or null if the user is signed out. */
+    public String getAuthToken() {
+        String token = properties.getProperty(KEY_AUTH_TOKEN);
+        return (token == null || token.isBlank()) ? null : token;
+    }
+
+    public void setAuthToken(String token) {
+        if (token == null) {
+            properties.remove(KEY_AUTH_TOKEN);
+        } else {
+            properties.setProperty(KEY_AUTH_TOKEN, token);
+        }
     }
 
     public String getServerHost() {

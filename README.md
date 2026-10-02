@@ -4,7 +4,7 @@
 
 NixChat is a real-time messenger developed as a university team project (3rd semester, Fall 2026). The goal is a fast, secure, Telegram-level experience for the core messaging features: the server relays messages without ever being able to read them.
 
-> 🚧 **Status:** in active development. Current milestone: a shared chat room — the JavaFX client and the server exchange messages in real time over WebSocket; the client keeps an encrypted local history and a contact list.
+> 🚧 **Status:** in active development. Current milestone: accounts and login (PostgreSQL, BCrypt, JWT) and a shared chat room in real time over WebSocket; the client keeps an encrypted local history and a contact list.
 
 > 📋 How the code covers the course requirements (Steps 1–5): [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)
 
@@ -83,21 +83,30 @@ nix-chat/
 
 On Windows (PowerShell), use `.\gradlew.bat` instead of `./gradlew`.
 
-### Build and test
+### 1. Start the database
+```bash
+docker compose up -d
+```
+This starts PostgreSQL (plus Redis and MinIO for later milestones). The server creates its tables on first start.
+
+### 2. Build and test
 ```bash
 ./gradlew build
 ```
+Tests use an in-memory H2 database, so they do not need Docker.
 
-### Run the server
+### 3. Run the server
 ```bash
 ./gradlew :server:bootRun
 ```
 The server starts on `http://localhost:8080`; health check: `http://localhost:8080/actuator/health`.
 
-### Run the client
+### 4. Run the client
 ```bash
 ./gradlew :client:run
 ```
+Create an account on the first screen, or sign in. The login is remembered until you press **Sign out**.
+
 Start two clients with different profiles to chat between them on one computer:
 ```bash
 ./gradlew :client:run --args="--profile=alice"
@@ -110,11 +119,13 @@ To connect to another machine:
 ./gradlew :client:run --args="--host=192.168.1.10 --port=8080"
 ```
 
-### Run the infrastructure
-```bash
-docker compose up -d
-```
-This starts PostgreSQL, Redis and MinIO for local development.
+### API
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/api/auth/register` | — | `{username, displayName, password}` → `{token, username, displayName}` |
+| POST | `/api/auth/login` | — | `{username, password}` → `{token, username, displayName}` |
+| GET | `/api/me` | Bearer token | Current user |
+| WS | `/ws` | Bearer token | Real-time chat |
 
 ---
 

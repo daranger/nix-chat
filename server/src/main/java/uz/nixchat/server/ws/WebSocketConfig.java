@@ -11,14 +11,17 @@ import uz.nixchat.common.Protocol;
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final ChatWebSocketHandler chatHandler;
+    private final JwtHandshakeInterceptor jwtInterceptor;
 
-    public WebSocketConfig(ChatWebSocketHandler chatHandler) {
+    public WebSocketConfig(ChatWebSocketHandler chatHandler, JwtHandshakeInterceptor jwtInterceptor) {
         this.chatHandler = chatHandler;
+        this.jwtInterceptor = jwtInterceptor;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        // TODO: restrict allowed origins once authentication is in place
-        registry.addHandler(chatHandler, Protocol.WS_PATH).setAllowedOriginPatterns("*");
+        registry.addHandler(chatHandler, Protocol.WS_PATH)
+                .addInterceptors(jwtInterceptor)
+                .setAllowedOriginPatterns("*");
     }
 }

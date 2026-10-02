@@ -18,6 +18,11 @@ public final class Protocol {
     private Protocol() {
     }
 
+    /** Builds the base URL of the REST API, e.g. {@code http://localhost:8080}. */
+    public static String httpUrl(String host, int port) {
+        return "http://" + host + ":" + port;
+    }
+
     /** Builds the WebSocket URL for a given host, e.g. {@code ws://localhost:8080/ws}. */
     public static String wsUrl(String host, int port) {
         return "ws://" + host + ":" + port + WS_PATH;
