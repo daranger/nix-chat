@@ -74,7 +74,13 @@ JavaFX 21 + AtlantaFX dark theme (as in PMC). Every team member must be able to 
 - `ui.ChatView` — layout: contacts sidebar, feed, input bar
 - `ui.MessageCell`, `ui.ContactCell` — custom list cells
 
-Screen sketches for QA: see the project presentation / design file.
+Screen sketches for QA: [NixChat-Screen-Sketches.pdf](NixChat-Screen-Sketches.pdf).
+
+## Course materials
+
+- [NixChat-Project-Description.docx](NixChat-Project-Description.docx) — project description
+- [NixChat-Presentation.pdf](NixChat-Presentation.pdf) — presentation for the defense
+- [NixChat-Screen-Sketches.pdf](NixChat-Screen-Sketches.pdf) — screen sketches (Step 4)
 
 ## Step 5 — Packages
 
