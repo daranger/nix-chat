@@ -119,6 +119,10 @@ To connect to another machine:
 ./gradlew :client:run --args="--host=192.168.1.10 --port=8080"
 ```
 
+### Web test client
+The server also serves a small browser client at `http://<server-ip>:8080/` — handy for testing from a phone on the same Wi-Fi.
+It uses the same accounts and the same chat as the desktop app. On Windows, allow Java (or port 8080) for private networks in the firewall.
+
 ### API
 | Method | Path | Auth | Description |
 |---|---|---|---|
