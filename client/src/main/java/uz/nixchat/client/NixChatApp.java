@@ -3,56 +3,134 @@ package uz.nixchat.client;
 import atlantafx.base.theme.PrimerDark;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import uz.nixchat.client.net.ChatConnection;
+import uz.nixchat.client.net.WireFormat;
+import uz.nixchat.client.storage.AppSettings;
+import uz.nixchat.client.storage.ContactStore;
+import uz.nixchat.client.storage.FileMessageStorage;
+import uz.nixchat.client.ui.ChatView;
 import uz.nixchat.common.Protocol;
+import uz.nixchat.common.model.User;
+import uz.nixchat.common.model.message.Message;
+import uz.nixchat.common.model.message.SystemMessage;
+import uz.nixchat.common.model.message.TextMessage;
+import uz.nixchat.common.storage.MessageStorage;
 
 import java.net.URI;
-import java.util.concurrent.ThreadLocalRandom;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Map;
 
 /**
- * First milestone of the desktop client: one shared room connected to the server over WebSocket.
+ * Entry point of the desktop client. Wires together settings, local storage, the network connection and the UI.
+ * <p>
+ * Command-line options: {@code --profile=alice} (separate settings and history, handy for running two clients
+ * on one computer), {@code --host=...}, {@code --port=...}.
  */
 public class NixChatApp extends Application {
 
-    private final String nickname = "guest-" + ThreadLocalRandom.current().nextInt(1000, 10000);
-    private final ListView<String> messages = new ListView<>();
-    private final Label status = new Label();
+    /** The shared room — the only chat until private and group chats reach the server. */
+    private static final String GENERAL_CHAT = "general";
+    private static final int HISTORY_SIZE = 100;
+
+    private User me;
+    private MessageStorage history;
+    private ContactStore contacts;
+    private ChatView view;
     private ChatConnection connection;
 
     @Override
     public void start(Stage stage) {
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
 
-        String host = getParameters().getNamed().getOrDefault("host", "localhost");
-        int port = Integer.parseInt(getParameters().getNamed().getOrDefault("port",
-                String.valueOf(Protocol.DEFAULT_PORT)));
+        Map<String, String> args = getParameters().getNamed();
+        Path profileDir = Path.of(System.getProperty("user.home"), ".nixchat", args.getOrDefault("profile", "default"));
 
-        connection = new ChatConnection(
-                URI.create(Protocol.wsUrl(host, port)),
-                text -> Platform.runLater(() -> addMessage(text)),
-                text -> Platform.runLater(() -> status.setText(text)));
+        AppSettings settings = AppSettings.load(profileDir);
+        applyCommandLine(settings, args);
+        me = settings.getCurrentUser();
 
-        BorderPane root = new BorderPane();
-        root.setTop(buildHeader());
-        root.setCenter(messages);
-        root.setBottom(buildInputBar());
+        // Polymorphism: the app only knows the MessageStorage interface, not the file-based implementation
+        history = new FileMessageStorage(profileDir, settings.createCacheEncryptor());
+        contacts = new ContactStore(profileDir);
 
-        stage.setTitle("NixChat");
-        stage.setScene(new Scene(root, 420, 640));
+        view = new ChatView(me, "General", this::send);
+        for (Message message : history.findLast(GENERAL_CHAT, HISTORY_SIZE)) {
+            view.showMessage(message);
+        }
+        view.showContacts(contacts.getAll());
+
+        stage.setTitle("NixChat — " + me);
+        stage.setScene(new Scene(view, 760, 560));
         stage.show();
 
+        connect(settings.getServerHost(), settings.getServerPort());
+    }
+
+    private void applyCommandLine(AppSettings settings, Map<String, String> args) {
+        String host = args.get("host");
+        String port = args.get("port");
+        if (host == null && port == null) {
+            return;
+        }
+        int portNumber = settings.getServerPort();
+        if (port != null) {
+            try {
+                portNumber = Integer.parseInt(port);
+            } catch (NumberFormatException e) {
+                System.err.println("--port must be a number, got '" + port + "'");
+            }
+        }
+        settings.setServer(host != null ? host : settings.getServerHost(), portNumber);
+        settings.save();
+    }
+
+    private void connect(String host, int port) {
+        URI uri;
+        // try-catch #3: URISyntaxException — the host from the settings may not form a valid address
+        try {
+            uri = new URI(Protocol.wsUrl(host, port));
+        } catch (URISyntaxException e) {
+            view.showMessage(new SystemMessage(GENERAL_CHAT, "Invalid server address: " + e.getInput()));
+            view.setStatus("Offline");
+            return;
+        }
+
+        connection = new ChatConnection(uri,
+                raw -> Platform.runLater(() -> onIncoming(raw)),
+                text -> Platform.runLater(() -> view.setStatus(text)));
         connection.connect();
+    }
+
+    private void onIncoming(String raw) {
+        Message message = WireFormat.decode(raw, GENERAL_CHAT);
+        view.showMessage(message);
+
+        if (message instanceof TextMessage) {
+            history.save(message);
+            User sender = message.getSender();
+            if (!message.isFrom(me)) {
+                contacts.touch(sender, Instant.now());
+                view.showContacts(contacts.getAll());
+            }
+        }
+    }
+
+    private void send(String text) {
+        if (connection == null || !connection.isConnected()) {
+            view.showMessage(new SystemMessage(GENERAL_CHAT, "Not connected to the server"));
+            return;
+        }
+        try {
+            TextMessage message = new TextMessage(GENERAL_CHAT, me, text);
+            connection.send(WireFormat.encode(message));
+            // Not saved here: the server echoes the message back, and onIncoming() stores it
+        } catch (IllegalArgumentException e) {
+            view.showMessage(new SystemMessage(GENERAL_CHAT, e.getMessage()));
+        }
     }
 
     @Override
@@ -60,47 +138,6 @@ public class NixChatApp extends Application {
         if (connection != null) {
             connection.close();
         }
-    }
-
-    private HBox buildHeader() {
-        Label title = new Label("NixChat");
-        title.getStyleClass().add("title-3");
-        Label me = new Label("You: " + nickname);
-        me.getStyleClass().add("text-muted");
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox header = new HBox(12, title, me, spacer, status);
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(12));
-        return header;
-    }
-
-    private HBox buildInputBar() {
-        TextField input = new TextField();
-        input.setPromptText("Message");
-        HBox.setHgrow(input, Priority.ALWAYS);
-
-        Button send = new Button("Send");
-        send.setDefaultButton(true);
-        send.setOnAction(e -> {
-            String text = input.getText().strip();
-            if (text.isEmpty() || !connection.isConnected()) {
-                return;
-            }
-            connection.send(nickname + ": " + text);
-            input.clear();
-        });
-
-        HBox bar = new HBox(8, input, send);
-        bar.setPadding(new Insets(12));
-        return bar;
-    }
-
-    private void addMessage(String text) {
-        messages.getItems().add(text);
-        messages.scrollTo(messages.getItems().size() - 1);
     }
 
     public static void main(String[] args) {

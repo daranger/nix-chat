@@ -4,7 +4,9 @@
 
 NixChat is a real-time messenger developed as a university team project (3rd semester, Fall 2026). The goal is a fast, secure, Telegram-level experience for the core messaging features: the server relays messages without ever being able to read them.
 
-> 🚧 **Status:** in active development. Current milestone: a shared chat room — the JavaFX client and the server exchange messages in real time over WebSocket.
+> 🚧 **Status:** in active development. Current milestone: a shared chat room — the JavaFX client and the server exchange messages in real time over WebSocket; the client keeps an encrypted local history and a contact list.
+
+> 📋 How the code covers the course requirements (Steps 1–5): [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)
 
 ---
 
@@ -57,9 +59,10 @@ NixChat is a real-time messenger developed as a university team project (3rd sem
 
 ```
 nix-chat/
-├── common/   # Shared DTOs, message protocol, crypto utilities
+├── common/   # Domain model (users, chats, messages), encryption, storage interfaces
 ├── server/   # Spring Boot backend
-└── client/   # JavaFX desktop client
+├── client/   # JavaFX desktop client: ui / net / storage packages
+└── docs/     # Course requirements mapping
 ```
 
 ---
@@ -70,7 +73,7 @@ nix-chat/
 - JDK 21+ (if it's missing, Gradle downloads it automatically on the first build)
 - Docker and Docker Compose (needed once the database is added)
 
-On Windows, use `gradlew.bat` instead of `./gradlew`.
+On Windows (PowerShell), use `.\gradlew.bat` instead of `./gradlew`.
 
 ### Build and test
 ```bash
@@ -87,7 +90,14 @@ The server starts on `http://localhost:8080`; health check: `http://localhost:80
 ```bash
 ./gradlew :client:run
 ```
-Start two clients to chat between them. To connect to another machine:
+Start two clients with different profiles to chat between them on one computer:
+```bash
+./gradlew :client:run --args="--profile=alice"
+./gradlew :client:run --args="--profile=bob"
+```
+Each profile keeps its own files in `~/.nixchat/<profile>/`: `settings.properties`, `contacts.csv` and an encrypted `messages-cache.tsv`.
+
+To connect to another machine:
 ```bash
 ./gradlew :client:run --args="--host=192.168.1.10 --port=8080"
 ```

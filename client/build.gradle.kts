@@ -11,6 +11,10 @@ javafx {
 dependencies {
     implementation(project(":common"))
     implementation("io.github.mkpaz:atlantafx-base:2.0.1")
+
+    testImplementation(platform("org.junit:junit-bom:5.12.2"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 application {

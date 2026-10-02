@@ -1,4 +1,4 @@
-package uz.nixchat.client;
+package uz.nixchat.client.net;
 
 import java.net.URI;
 import java.net.http.HttpClient;
