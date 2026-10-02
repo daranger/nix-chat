@@ -31,6 +31,14 @@ NixChat is a real-time messenger developed as a university team project (3rd sem
 - The server stores and relays only ciphertext
 - Passwords hashed with BCrypt
 
+### Departments
+- **Wallet** — NixCoin virtual currency: balances and transfers between friends
+- **Music** — share tracks in chats, collaborative playlists
+- **Games** — mini-games inside chats, starting with tic-tac-toe
+- **Store** — NixStore, a catalog of mini-apps: install, search, rate
+
+See [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md#departments) for all six departments and their positions.
+
 ### Planned
 - Multi-device sync
 - Horizontal scaling (multiple server instances via Redis pub/sub)
@@ -59,7 +67,7 @@ NixChat is a real-time messenger developed as a university team project (3rd sem
 
 ```
 nix-chat/
-├── common/   # Domain model (users, chats, messages), encryption, storage interfaces
+├── common/   # Domain model, departments (wallet, music, games, store), encryption
 ├── server/   # Spring Boot backend
 ├── client/   # JavaFX desktop client: ui / net / storage packages
 └── docs/     # Course requirements mapping

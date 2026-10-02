@@ -21,8 +21,10 @@ All core concepts live in plain Java in the `common` and `client` modules, witho
 ## Step 2 — OOP
 
 **Inheritance (2 hierarchies)**
-1. `Message` → `TextMessage`, `FileMessage`, `SystemMessage` (`common/.../model/message`)
+1. `Message` → `TextMessage`, `FileMessage`, `SystemMessage`, `TrackMessage` (`common/.../model/message`)
 2. `Chat` → `PrivateChat`, `GroupChat` (`common/.../model/chat`)
+3. `Department` → six departments (`common/.../department`)
+4. `TurnBasedGame` → `TicTacToe` (`common/.../games`)
 
 Bonus: `ChatView extends BorderPane`, `MessageCell` / `ContactCell extends ListCell` (JavaFX).
 
@@ -62,6 +64,8 @@ Also: `User.equals()` / `hashCode()` / `toString()`, `MessageCell.updateItem()`,
 2. `NumberFormatException` — `AppSettings.getServerPort()`: port edited by hand to non-number
 3. `URISyntaxException` — `NixChatApp.connect()`: invalid server address
 4. `GeneralSecurityException` — `FileMessageStorage.decodeLine()`: wrong key or tampered cache
+
+**Custom exception** — `InsufficientFundsException` (checked) in the Wallet department: `WalletService.transfer()` throws it when the balance is too low.
 
 **One try-catch with multiple catches and finally** — `FileMessageStorage.load()`:
 `catch (NoSuchFileException)` → `catch (IOException)` → `catch (RuntimeException)` → `finally` (prints load statistics).
@@ -105,6 +109,22 @@ uz.nixchat.server.ws              WebSocketConfig, ChatWebSocketHandler         
 - `Protocol.wsUrl()` — package `common`
 - `ChatView.showMessage()` — package `client.ui`
 
+## Departments
+
+Like the departments of PMC, NixChat is organised into six departments. Each is a subclass of the abstract
+`Department` with four positions (24 in total) and its own code package; `NixChatCompany` lists them all.
+
+| Department | Mission | Feature in code | Package |
+|---|---|---|---|
+| Messaging | Private and group chats | chats, messages, roles | `common.model` |
+| Wallet | NixCoin virtual currency | balances, transfers, history | `common.wallet` |
+| Music | Sharing tracks, playlists | `Track`, `Playlist`, `TrackMessage` | `common.music` |
+| Games | Games inside chats | `Game`, `TurnBasedGame`, `TicTacToe` | `common.games` |
+| Store | NixStore mini-app catalog | publish, search, install, rate | `common.store` |
+| Security | Encryption and safety | AES-256-GCM encryption | `common.crypto` |
+
+NixCoin is a virtual currency with no real-money value.
+
 ## Tests
 
-`./gradlew test` — 21 unit tests: message types, chats and roles, encryption, local files.
+`./gradlew test` — 32 unit tests: message types, chats and roles, encryption, local files, departments, wallet, music, games, store.

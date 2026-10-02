@@ -6,6 +6,8 @@ import uz.nixchat.common.model.message.FileMessage;
 import uz.nixchat.common.model.message.Message;
 import uz.nixchat.common.model.message.SystemMessage;
 import uz.nixchat.common.model.message.TextMessage;
+import uz.nixchat.common.model.message.TrackMessage;
+import uz.nixchat.common.music.Track;
 import uz.nixchat.common.storage.MessageStorage;
 
 import java.io.BufferedReader;
@@ -26,7 +28,7 @@ import java.util.List;
  * File 3 of 3: local message cache, stored in {@code messages-cache.tsv}.
  * Entity: {@link Message}. Message contents are encrypted with the {@link Encryptor} from the settings.
  * <p>
- * Line format (tab-separated): {@code type, id, chatId, sender, sentAt, payload[, fileSize]}
+ * Line format (tab-separated): {@code type, id, chatId, sender, sentAt, payload[, fileSize | trackDuration]}
  */
 public class FileMessageStorage implements MessageStorage {
 
@@ -92,6 +94,11 @@ public class FileMessageStorage implements MessageStorage {
                 case "TEXT" -> new TextMessage(id, chatId, sender, sentAt, payload);
                 case "FILE" -> new FileMessage(id, chatId, sender, sentAt, payload, Long.parseLong(parts[6]));
                 case "SYSTEM" -> new SystemMessage(id, chatId, sentAt, payload);
+                case "TRACK" -> {
+                    String[] artistAndTitle = payload.split("\n", 2);
+                    Track track = new Track(artistAndTitle[0], artistAndTitle[1], Integer.parseInt(parts[6]));
+                    yield new TrackMessage(id, chatId, sender, sentAt, track);
+                }
                 default -> throw new IllegalArgumentException("Unknown message type " + type);
             };
         } catch (GeneralSecurityException e) {
@@ -115,6 +122,10 @@ public class FileMessageStorage implements MessageStorage {
             extra = SEPARATOR + fileMessage.getSizeBytes();
         } else if (message instanceof SystemMessage system) {
             payload = system.getNotice();
+        } else if (message instanceof TrackMessage trackMessage) {
+            Track track = trackMessage.getTrack();
+            payload = track.artist() + "\n" + track.title();
+            extra = SEPARATOR + track.durationSeconds();
         } else {
             throw new IllegalArgumentException("Unsupported message " + message.getClass().getSimpleName());
         }

@@ -8,6 +8,8 @@ import uz.nixchat.common.model.message.FileMessage;
 import uz.nixchat.common.model.message.Message;
 import uz.nixchat.common.model.message.SystemMessage;
 import uz.nixchat.common.model.message.TextMessage;
+import uz.nixchat.common.model.message.TrackMessage;
+import uz.nixchat.common.music.Track;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -52,15 +54,17 @@ class LocalFilesTest {
         storage.save(new TextMessage("general", alice, "top secret"));
         storage.save(new FileMessage("general", alice, "notes.pdf", 2048));
         storage.save(new SystemMessage("general", "bob joined"));
+        storage.save(new TrackMessage("general", alice, new Track("Artist A", "Song 1", 225)));
 
         String onDisk = Files.readString(dir.resolve(FileMessageStorage.FILE_NAME));
         assertFalse(onDisk.contains("top secret"));
 
         List<Message> reloaded = new FileMessageStorage(dir, encryptor).findByChat("general");
-        assertEquals(3, reloaded.size());
+        assertEquals(4, reloaded.size());
         assertInstanceOf(TextMessage.class, reloaded.get(0));
         assertInstanceOf(FileMessage.class, reloaded.get(1));
         assertInstanceOf(SystemMessage.class, reloaded.get(2));
+        assertEquals("♪ Artist A — Song 1 (3:45)", reloaded.get(3).preview());
         assertEquals("top secret", ((TextMessage) reloaded.get(0)).getText());
     }
 
