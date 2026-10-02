@@ -87,7 +87,7 @@ On Windows (PowerShell), use `.\gradlew.bat` instead of `./gradlew`.
 ```bash
 docker compose up -d
 ```
-This starts PostgreSQL (plus Redis and MinIO for later milestones). The server creates its tables on first start.
+This starts PostgreSQL (plus Redis for later milestones). The server creates its tables on first start.
 
 ### 2. Build and test
 ```bash

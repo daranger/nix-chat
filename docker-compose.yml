@@ -1,4 +1,5 @@
 # Local development infrastructure. Passwords here are for development only.
+# File storage (for photos and files) will be added when file sharing reaches the server.
 services:
   postgres:
     image: postgres:17
@@ -16,18 +17,5 @@ services:
     ports:
       - "6379:6379"
 
-  minio:
-    image: minio/minio
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: nixchat
-      MINIO_ROOT_PASSWORD: nixchat-dev-password
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio-data:/data
-
 volumes:
   postgres-data:
-  minio-data:
