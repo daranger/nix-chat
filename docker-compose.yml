@@ -17,5 +17,15 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
 
+  # Web UI for the database (like phpMyAdmin, but for PostgreSQL): http://localhost:8081
+  adminer:
+    image: adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "127.0.0.1:8081:8080"
+    depends_on:
+      - postgres
+
 volumes:
   postgres-data:
