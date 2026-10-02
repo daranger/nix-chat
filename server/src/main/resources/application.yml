@@ -24,6 +24,13 @@ nixchat:
     # Development only! Set JWT_SECRET (at least 32 characters) on any real server.
     secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}
     ttl: 7d
+  phone:
+    # Secret for hashing phone keys. Development only! Set PHONE_PEPPER on any real server and never change it
+    # afterwards, or linked numbers stop matching.
+    pepper: ${PHONE_PEPPER:dev-only-phone-pepper-change-me-0123456789}
+    # Telegram Gateway token from gateway.telegram.org. Empty = codes are printed to the server console.
+    telegram-token: ${TELEGRAM_GATEWAY_TOKEN:}
+    code-ttl: 5m
 
 management:
   endpoints:

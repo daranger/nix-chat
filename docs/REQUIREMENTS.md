@@ -35,6 +35,7 @@ Bonus: `ChatView extends BorderPane`, `MessageCell` / `ContactCell extends ListC
 **Interfaces with implementations (2)**
 1. `Encryptor` → `AesGcmEncryptor`, `NoOpEncryptor` (plus default methods `encryptText()` / `decryptText()`)
 2. `MessageStorage` → `InMemoryMessageStorage`, `FileMessageStorage` (plus default method `findLast()`)
+3. `VerificationSender` (server) → `TelegramGatewaySender`, `DevConsoleSender`; `PhoneConfig` picks one at startup
 
 **Method overriding (3+)**
 1. `preview()` — overridden in `TextMessage`, `FileMessage`, `SystemMessage`

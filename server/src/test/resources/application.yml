@@ -15,3 +15,7 @@ nixchat:
   jwt:
     secret: test-secret-0123456789abcdef0123456789abcdef
     ttl: 1h
+  phone:
+    pepper: test-phone-pepper-0123456789abcdef0123456789
+    telegram-token: ""
+    code-ttl: 5m

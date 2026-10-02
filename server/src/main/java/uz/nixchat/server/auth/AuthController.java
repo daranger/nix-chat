@@ -44,6 +44,6 @@ public class AuthController {
     @GetMapping("/api/me")
     public MeResponse me(@AuthenticationPrincipal Jwt jwt) {
         UserAccount account = authService.findAccount(jwt.getSubject());
-        return new MeResponse(account.getUsername(), account.getDisplayName());
+        return new MeResponse(account.getUsername(), account.getDisplayName(), account.getPhoneHash() != null);
     }
 }

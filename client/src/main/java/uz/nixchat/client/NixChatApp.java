@@ -16,6 +16,8 @@ import uz.nixchat.client.storage.ContactStore;
 import uz.nixchat.client.storage.FileMessageStorage;
 import uz.nixchat.client.ui.ChatView;
 import uz.nixchat.client.ui.LoginView;
+import uz.nixchat.client.ui.PhoneView;
+import uz.nixchat.common.crypto.PhoneHasher;
 import uz.nixchat.common.Protocol;
 import uz.nixchat.common.model.User;
 import uz.nixchat.common.model.message.Message;
@@ -29,6 +31,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -54,6 +57,7 @@ public class NixChatApp extends Application {
     private ContactStore contacts;
     private ChatView view;
     private ChatConnection connection;
+    private String token;
 
     @Override
     public void start(Stage stage) {
@@ -164,6 +168,7 @@ public class NixChatApp extends Application {
     // ---------------------------------------------------------------- chat
 
     private void openChat(String token) {
+        this.token = token;
         me = settings.getCurrentUser();
         ((Stage) root.getScene().getWindow()).setTitle("NixChat — " + me);
 
@@ -171,7 +176,7 @@ public class NixChatApp extends Application {
         history = new FileMessageStorage(profileDir, settings.createCacheEncryptor());
         contacts = new ContactStore(profileDir);
 
-        view = new ChatView(me, "General", this::send, this::signOut);
+        view = new ChatView(me, "General", this::send, this::showPhone, this::signOut);
         for (Message message : history.findLast(GENERAL_CHAT, HISTORY_SIZE)) {
             view.showMessage(message);
         }
@@ -242,6 +247,83 @@ public class NixChatApp extends Application {
         }
         // The server adds our verified username and echoes the message back; onIncoming() stores it
         connection.send(text);
+    }
+
+    // ---------------------------------------------------------------- phone
+
+    @FunctionalInterface
+    private interface ApiTask<T> {
+        T run() throws IOException, InterruptedException, AuthException;
+    }
+
+    /** Runs an API call in the background; success and error handlers run on the UI thread. */
+    private <T> void background(ApiTask<T> task, java.util.function.Consumer<T> onSuccess,
+                                java.util.function.Consumer<String> onError) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                T result = task.run();
+                Platform.runLater(() -> onSuccess.accept(result));
+            } catch (AuthException e) {
+                Platform.runLater(() -> onError.accept(e.getMessage()));
+            } catch (IllegalArgumentException e) {
+                Platform.runLater(() -> onError.accept(e.getMessage()));
+            } catch (IOException e) {
+                Platform.runLater(() -> onError.accept("Server is not reachable"));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+    }
+
+    private void showPhone() {
+        PhoneView[] holder = new PhoneView[1];
+        PhoneView phoneView = new PhoneView(new PhoneView.Listener() {
+            @Override
+            public void onSendCode(String phone) {
+                holder[0].setBusy(true);
+                background(() -> api.startPhoneLink(token, phone),
+                        started -> { holder[0].setBusy(false); holder[0].showCodeSent(started.maskedPhone(), started.expiresInSeconds()); },
+                        error -> { holder[0].setBusy(false); holder[0].showMessage(error, true); });
+            }
+
+            @Override
+            public void onConfirmCode(String code) {
+                holder[0].setBusy(true);
+                background(() -> { api.verifyPhone(token, code); return Boolean.TRUE; },
+                        ok -> { holder[0].setBusy(false); holder[0].showLinked(); },
+                        error -> { holder[0].setBusy(false); holder[0].showMessage(error, true); });
+            }
+
+            @Override
+            public void onUnlink() {
+                background(() -> { api.unlinkPhone(token); return Boolean.TRUE; },
+                        ok -> { holder[0].setLinked(false); holder[0].showMessage("Number unlinked", false); },
+                        error -> holder[0].showMessage(error, true));
+            }
+
+            @Override
+            public void onFindFriend(String phone) {
+                holder[0].setBusy(true);
+                holder[0].showFindResult("Searching…");
+                // PBKDF2 runs here on the client, so the friend's number never leaves this computer
+                background(() -> api.lookup(token, List.of(PhoneHasher.phoneKey(phone))),
+                        matches -> {
+                            holder[0].setBusy(false);
+                            holder[0].showFindResult(matches.isEmpty()
+                                    ? "Nobody with this number uses NixChat (or they did not link it)"
+                                    : "Found: " + matches.get(0).displayName() + " (@" + matches.get(0).username() + ")");
+                        },
+                        error -> { holder[0].setBusy(false); holder[0].showFindResult(error); });
+            }
+
+            @Override
+            public void onBack() {
+                root.getChildren().setAll(view);
+            }
+        });
+        holder[0] = phoneView;
+        root.getChildren().setAll(phoneView);
+        background(() -> api.isPhoneLinked(token), phoneView::setLinked, error -> phoneView.showMessage(error, true));
     }
 
     private void closeConnection() {

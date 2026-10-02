@@ -119,6 +119,24 @@ To connect to another machine:
 ./gradlew :client:run --args="--host=192.168.1.10 --port=8080"
 ```
 
+### Phone numbers (optional, never stored)
+Registration needs only a username and a password. A phone number can be linked later from the **Phone** screen
+so that friends can find you:
+
+1. The client normalizes the number to `+998…` and the server sends a code to it via the
+   [Telegram Gateway](https://core.telegram.org/gateway) ($0.01 per code; codes to your own number are free).
+2. After the code is confirmed, the database keeps only `HMAC-SHA256(pepper, PBKDF2(number))`. The number itself is
+   forgotten right after the code is sent.
+3. To find a friend, the client computes the PBKDF2 key locally and sends only that key.
+
+Configuration (environment variables):
+
+| Variable | Meaning |
+|---|---|
+| `PHONE_PEPPER` | Secret for the HMAC (32+ characters). Keep it out of the database and never change it, or linked numbers stop matching |
+| `TELEGRAM_GATEWAY_TOKEN` | Token from gateway.telegram.org. If empty, codes are printed to the server console (free development mode) |
+| `JWT_SECRET` | Secret for login tokens (32+ characters) |
+
 ### Web test client
 The server also serves a small browser client at `http://<server-ip>:8080/` — handy for testing from a phone on the same Wi-Fi.
 It uses the same accounts and the same chat as the desktop app. On Windows, allow Java (or port 8080) for private networks in the firewall.
@@ -128,7 +146,11 @@ It uses the same accounts and the same chat as the desktop app. On Windows, allo
 |---|---|---|---|
 | POST | `/api/auth/register` | — | `{username, displayName, password}` → `{token, username, displayName}` |
 | POST | `/api/auth/login` | — | `{username, password}` → `{token, username, displayName}` |
-| GET | `/api/me` | Bearer token | Current user |
+| GET | `/api/me` | Bearer token | Current user, including whether a phone is linked |
+| POST | `/api/phone/start` | Bearer token | `{phone}` → sends a code via Telegram (or prints it to the server console in dev mode) |
+| POST | `/api/phone/verify` | Bearer token | `{code}` → links the number; only its keyed hash is stored |
+| DELETE | `/api/phone` | Bearer token | Unlink the number |
+| POST | `/api/contacts/lookup` | Bearer token | `{phoneKeys: [...]}` (PBKDF2 keys computed on the client) → matching users |
 | WS | `/ws` | Bearer token | Real-time chat |
 
 ---

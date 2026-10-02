@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import uz.nixchat.server.auth.AuthDtos.ErrorResponse;
 import uz.nixchat.server.auth.AuthExceptions.InvalidCredentialsException;
 import uz.nixchat.server.auth.AuthExceptions.UsernameTakenException;
+import uz.nixchat.server.phone.PhoneExceptions.DeliveryFailedException;
+import uz.nixchat.server.phone.PhoneExceptions.PhoneTakenException;
+import uz.nixchat.server.phone.PhoneExceptions.TooManyRequestsException;
 
 /**
  * Turns exceptions into JSON errors: {@code {"error": "..."}} with a matching HTTP status.
@@ -22,6 +25,21 @@ public class ApiExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> invalidCredentials(InvalidCredentialsException e) {
         return error(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
+    @ExceptionHandler(PhoneTakenException.class)
+    public ResponseEntity<ErrorResponse> phoneTaken(PhoneTakenException e) {
+        return error(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorResponse> tooManyRequests(TooManyRequestsException e) {
+        return error(HttpStatus.TOO_MANY_REQUESTS, e.getMessage());
+    }
+
+    @ExceptionHandler(DeliveryFailedException.class)
+    public ResponseEntity<ErrorResponse> deliveryFailed(DeliveryFailedException e) {
+        return error(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

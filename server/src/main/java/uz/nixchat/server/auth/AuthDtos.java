@@ -18,7 +18,7 @@ public final class AuthDtos {
     public record AuthResponse(String token, String username, String displayName) {
     }
 
-    public record MeResponse(String username, String displayName) {
+    public record MeResponse(String username, String displayName, boolean phoneLinked) {
     }
 
     public record ErrorResponse(String error) {

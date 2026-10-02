@@ -32,6 +32,10 @@ public class UserAccount {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    /** HMAC of the phone key, or null. The phone number itself is never stored. */
+    @Column(name = "phone_hash", length = 64, unique = true)
+    private String phoneHash;
+
     protected UserAccount() {
         // for JPA
     }
@@ -61,5 +65,13 @@ public class UserAccount {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public String getPhoneHash() {
+        return phoneHash;
+    }
+
+    public void setPhoneHash(String phoneHash) {
+        this.phoneHash = phoneHash;
     }
 }

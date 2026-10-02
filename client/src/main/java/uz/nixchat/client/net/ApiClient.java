@@ -9,7 +9,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +22,14 @@ public class ApiClient {
 
     /** What the server returns after login or registration. */
     public record Session(String token, String username, String displayName) {
+    }
+
+    /** A code was sent to this (masked) number. */
+    public record LinkStarted(String maskedPhone, long expiresInSeconds) {
+    }
+
+    /** A NixChat user found by phone. */
+    public record Match(String username, String displayName) {
     }
 
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
@@ -61,12 +71,59 @@ public class ApiClient {
         return new Session(token, response.path("username").asText(), response.path("displayName").asText());
     }
 
-    private HttpRequest post(String path, Map<String, String> body) throws IOException {
-        return HttpRequest.newBuilder(URI.create(baseUrl + path))
+    /** Whether the signed-in user has linked a phone number. */
+    public boolean isPhoneLinked(String token) throws IOException, InterruptedException, AuthException {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + "/api/me"))
+                .timeout(TIMEOUT)
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
+        return send(request).path("phoneLinked").asBoolean(false);
+    }
+
+    /** Asks the server to send a code to the number. The number is sent once and is not stored. */
+    public LinkStarted startPhoneLink(String token, String phone)
+            throws IOException, InterruptedException, AuthException {
+        JsonNode response = send(post("/api/phone/start", Map.of("phone", phone), token));
+        return new LinkStarted(response.path("maskedPhone").asText(), response.path("expiresInSeconds").asLong());
+    }
+
+    public void verifyPhone(String token, String code) throws IOException, InterruptedException, AuthException {
+        send(post("/api/phone/verify", Map.of("code", code), token));
+    }
+
+    public void unlinkPhone(String token) throws IOException, InterruptedException, AuthException {
+        send(HttpRequest.newBuilder(URI.create(baseUrl + "/api/phone"))
+                .timeout(TIMEOUT)
+                .header("Authorization", "Bearer " + token)
+                .DELETE()
+                .build());
+    }
+
+    /** Sends phone keys (never numbers) and returns which of them belong to NixChat users. */
+    public List<Match> lookup(String token, List<String> phoneKeys)
+            throws IOException, InterruptedException, AuthException {
+        JsonNode response = send(post("/api/contacts/lookup", Map.of("phoneKeys", phoneKeys), token));
+        List<Match> matches = new ArrayList<>();
+        for (JsonNode node : response) {
+            matches.add(new Match(node.path("username").asText(), node.path("displayName").asText()));
+        }
+        return matches;
+    }
+
+    private HttpRequest post(String path, Map<String, ?> body) throws IOException {
+        return post(path, body, null);
+    }
+
+    private HttpRequest post(String path, Map<String, ?> body, String token) throws IOException {
+        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(baseUrl + path))
                 .timeout(TIMEOUT)
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body)))
-                .build();
+                .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body)));
+        if (token != null) {
+            builder.header("Authorization", "Bearer " + token);
+        }
+        return builder.build();
     }
 
     private JsonNode send(HttpRequest request) throws IOException, InterruptedException, AuthException {
