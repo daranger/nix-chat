@@ -4,7 +4,7 @@ plugins {
 }
 
 allprojects {
-    group = "uz.nixchat"
+    group = "uz.nchat"
     version = "0.1.0-SNAPSHOT"
 }
 

@@ -19,5 +19,5 @@ dependencies {
 }
 
 application {
-    mainClass.set("uz.nixchat.client.NixChatApp")
+    mainClass.set("uz.nchat.client.NchatApp")
 }

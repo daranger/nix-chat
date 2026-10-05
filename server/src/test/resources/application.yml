@@ -1,7 +1,7 @@
 # Tests run against an in-memory H2 database, so no PostgreSQL is needed for "gradlew build"
 spring:
   datasource:
-    url: jdbc:h2:mem:nixchat;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:nchat;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
     username: sa
     password: ""
   jpa:
@@ -11,7 +11,7 @@ spring:
   flyway:
     enabled: true
 
-nixchat:
+nchat:
   jwt:
     secret: test-secret-0123456789abcdef0123456789abcdef
     ttl: 1h

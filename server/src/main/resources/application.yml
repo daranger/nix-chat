@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: nix-chat-server
+    name: nchat-server
   threads:
     virtual:
       enabled: true
@@ -19,7 +19,7 @@ spring:
   flyway:
     enabled: true
 
-nixchat:
+nchat:
   jwt:
     # Development only! Set JWT_SECRET (at least 32 characters) on any real server.
     secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}

@@ -32,10 +32,10 @@ Nchat is a real-time messenger developed as a university team project (3rd semes
 - Passwords hashed with BCrypt
 
 ### Departments
-- **Wallet** — NixCoin virtual currency: balances and transfers between friends
+- **Wallet** — NCoin virtual currency: balances and transfers between friends
 - **Music** — share tracks in chats, collaborative playlists
 - **Games** — mini-games inside chats, starting with tic-tac-toe
-- **Store** — NixStore, a catalog of mini-apps: install, search, rate
+- **Store** — NStore, a catalog of mini-apps: install, search, rate
 
 See [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md#departments) for all six departments and their positions.
 
@@ -112,7 +112,7 @@ Start two clients with different profiles to chat between them on one computer:
 ./gradlew :client:run --args="--profile=alice"
 ./gradlew :client:run --args="--profile=bob"
 ```
-Each profile keeps its own files in `~/.nixchat/<profile>/`: `settings.properties`, `contacts.csv` and an encrypted `messages-cache.tsv`.
+Each profile keeps its own files in `~/.nchat/<profile>/`: `settings.properties`, `contacts.csv` and an encrypted `messages-cache.tsv`.
 
 To connect to another machine:
 ```bash
