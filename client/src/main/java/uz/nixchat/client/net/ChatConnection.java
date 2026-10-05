@@ -8,7 +8,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 
 /**
- * WebSocket connection to the NixChat server, built on the JDK's own {@link java.net.http.WebSocket}.
+ * WebSocket connection to the Nchat server, built on the JDK's own {@link java.net.http.WebSocket}.
  * Callbacks are invoked on a background thread: the UI must hop to the FX thread itself.
  */
 public class ChatConnection {

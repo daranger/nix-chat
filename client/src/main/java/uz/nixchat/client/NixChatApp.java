@@ -69,7 +69,7 @@ public class NixChatApp extends Application {
         applyCommandLine(settings, args);
         api = new ApiClient(Protocol.httpUrl(settings.getServerHost(), settings.getServerPort()));
 
-        stage.setTitle("NixChat");
+        stage.setTitle("Nchat");
         stage.setScene(new Scene(root, 760, 560));
         stage.show();
 
@@ -170,7 +170,7 @@ public class NixChatApp extends Application {
     private void openChat(String token) {
         this.token = token;
         me = settings.getCurrentUser();
-        ((Stage) root.getScene().getWindow()).setTitle("NixChat — " + me);
+        ((Stage) root.getScene().getWindow()).setTitle("Nchat — " + me);
 
         // Polymorphism: the app only knows the MessageStorage interface, not the file-based implementation
         history = new FileMessageStorage(profileDir, settings.createCacheEncryptor());
@@ -310,7 +310,7 @@ public class NixChatApp extends Application {
                         matches -> {
                             holder[0].setBusy(false);
                             holder[0].showFindResult(matches.isEmpty()
-                                    ? "Nobody with this number uses NixChat (or they did not link it)"
+                                    ? "Nobody with this number uses Nchat (or they did not link it)"
                                     : "Found: " + matches.get(0).displayName() + " (@" + matches.get(0).username() + ")");
                         },
                         error -> { holder[0].setBusy(false); holder[0].showFindResult(error); });

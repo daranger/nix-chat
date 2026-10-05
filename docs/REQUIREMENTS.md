@@ -1,4 +1,4 @@
-# Course requirements → NixChat code
+# Course requirements → Nchat code
 
 Where each project step (Dr. Shirin Noekhan) is implemented.
 All core concepts live in plain Java in the `common` and `client` modules, without framework magic.
@@ -79,13 +79,13 @@ JavaFX 21 + AtlantaFX dark theme (as in PMC). Every team member must be able to 
 - `ui.ChatView` — layout: contacts sidebar, feed, input bar
 - `ui.MessageCell`, `ui.ContactCell` — custom list cells
 
-Screen sketches for QA: [NixChat-Screen-Sketches.pdf](NixChat-Screen-Sketches.pdf).
+Screen sketches for QA: [Nchat-Screen-Sketches.pdf](Nchat-Screen-Sketches.pdf).
 
 ## Course materials
 
-- [NixChat-Project-Description.docx](NixChat-Project-Description.docx) — project description
-- [NixChat-Presentation.pdf](NixChat-Presentation.pdf) — presentation for the defense
-- [NixChat-Screen-Sketches.pdf](NixChat-Screen-Sketches.pdf) — screen sketches (Step 4)
+- [Nchat-Project-Description.docx](Nchat-Project-Description.docx) — project description
+- [Nchat-Presentation.pdf](Nchat-Presentation.pdf) — presentation for the defense
+- [Nchat-Screen-Sketches.pdf](Nchat-Screen-Sketches.pdf) — screen sketches (Step 4)
 
 ## Step 5 — Packages
 
@@ -114,7 +114,7 @@ uz.nixchat.server.config          SecurityConfig, JwtProperties
 
 ## Departments
 
-Like the departments of PMC, NixChat is organised into six departments. Each is a subclass of the abstract
+Like the departments of PMC, Nchat is organised into six departments. Each is a subclass of the abstract
 `Department` with four positions (24 in total) and its own code package; `NixChatCompany` lists them all.
 
 | Department | Mission | Feature in code | Package |

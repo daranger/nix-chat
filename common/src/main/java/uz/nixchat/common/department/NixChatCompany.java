@@ -3,7 +3,7 @@ package uz.nixchat.common.department;
 import java.util.List;
 
 /**
- * The company behind NixChat and its six departments.
+ * The company behind Nchat and its six departments.
  */
 public final class NixChatCompany {
 

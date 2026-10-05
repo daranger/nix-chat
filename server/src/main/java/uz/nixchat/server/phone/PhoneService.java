@@ -118,7 +118,7 @@ public class PhoneService {
     }
 
     /**
-     * Which of these phone keys belong to NixChat users. The client computes the keys with
+     * Which of these phone keys belong to Nchat users. The client computes the keys with
      * {@link PhoneHasher#phoneKey(String)}, so the numbers of its contacts never reach the server.
      */
     @Transactional(readOnly = true)

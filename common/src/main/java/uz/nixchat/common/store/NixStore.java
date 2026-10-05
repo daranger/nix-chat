@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * NixStore: the catalog of mini-apps users install into NixChat, like an app store inside the messenger.
+ * NixStore: the catalog of mini-apps users install into Nchat, like an app store inside the messenger.
  */
 public class NixStore {
 

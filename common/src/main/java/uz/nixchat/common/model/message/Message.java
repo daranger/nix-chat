@@ -38,7 +38,7 @@ public abstract class Message {
 
     /** Full line for the chat feed: "[12:30] alice: Hello". */
     public String format() {
-        String author = (sender == null) ? "NixChat" : sender.getUsername();
+        String author = (sender == null) ? "Nchat" : sender.getUsername();
         return "[" + formattedTime() + "] " + author + ": " + preview();
     }
 

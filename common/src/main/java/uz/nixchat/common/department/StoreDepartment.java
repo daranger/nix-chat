@@ -17,7 +17,7 @@ public class StoreDepartment extends Department {
 
     @Override
     public String getMission() {
-        return "NixStore, a catalog of mini-apps and bots users install into NixChat.";
+        return "NixStore, a catalog of mini-apps and bots users install into Nchat.";
     }
 
     @Override

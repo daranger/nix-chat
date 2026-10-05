@@ -1,8 +1,8 @@
-# NixChat
+# Nchat
 
 **Open-source desktop messenger with end-to-end encryption, built in Java.**
 
-NixChat is a real-time messenger developed as a university team project (3rd semester, Fall 2026). The goal is a fast, secure, Telegram-level experience for the core messaging features: the server relays messages without ever being able to read them.
+Nchat is a real-time messenger developed as a university team project (3rd semester, Fall 2026). The goal is a fast, secure, Telegram-level experience for the core messaging features: the server relays messages without ever being able to read them.
 
 > 🚧 **Status:** in active development. Current milestone: accounts and login (PostgreSQL, BCrypt, JWT) and a shared chat room in real time over WebSocket; the client keeps an encrypted local history and a contact list.
 

@@ -95,7 +95,7 @@ public class AppSettings {
         try {
             Files.createDirectories(file.getParent());
             try (Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
-                properties.store(writer, "NixChat client settings");
+                properties.store(writer, "Nchat client settings");
             }
         } catch (IOException e) {
             System.err.println("Could not save " + file + ": " + e.getMessage());

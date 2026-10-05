@@ -41,7 +41,7 @@ public class TextMessage extends Message {
     @Override
     public String format() {
         // In the feed a text message is shown in full, not shortened like in the preview
-        String author = (getSender() == null) ? "NixChat" : getSender().getUsername();
+        String author = (getSender() == null) ? "Nchat" : getSender().getUsername();
         return "[" + formattedTime() + "] " + author + ": " + text;
     }
 

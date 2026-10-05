@@ -6,7 +6,7 @@ package uz.nixchat.common;
  */
 public final class Protocol {
 
-    /** Default port of the NixChat server. */
+    /** Default port of the Nchat server. */
     public static final int DEFAULT_PORT = 8080;
 
     /** WebSocket endpoint for real-time messaging. */

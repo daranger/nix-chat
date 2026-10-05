@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * One department of the NixChat company. Each subclass defines its name, mission and positions;
+ * One department of the Nchat company. Each subclass defines its name, mission and positions;
  * this class handles staffing: who works in which position.
  */
 public abstract class Department {

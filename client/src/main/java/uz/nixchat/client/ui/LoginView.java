@@ -76,9 +76,9 @@ public class LoginView extends VBox {
     private void setRegisterMode(boolean register) {
         registerMode = register;
         error.setText("");
-        title.setText(register ? "Create your NixChat account" : "Sign in to NixChat");
+        title.setText(register ? "Create your Nchat account" : "Sign in to Nchat");
         submit.setText(register ? "Create account" : "Sign in");
-        switchMode.setText(register ? "Already have an account? Sign in" : "New to NixChat? Create an account");
+        switchMode.setText(register ? "Already have an account? Sign in" : "New to Nchat? Create an account");
         if (register) {
             getChildren().setAll(title, username, displayName, password, confirm, error, submit, switchMode, server);
         } else {

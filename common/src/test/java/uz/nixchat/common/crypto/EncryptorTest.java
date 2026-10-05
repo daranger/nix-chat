@@ -18,8 +18,8 @@ class EncryptorTest {
                 new NoOpEncryptor()
         };
         for (Encryptor encryptor : encryptors) {
-            String encrypted = encryptor.encryptText("Привет, NixChat!");
-            assertEquals("Привет, NixChat!", encryptor.decryptText(encrypted), encryptor.algorithmName());
+            String encrypted = encryptor.encryptText("Привет, Nchat!");
+            assertEquals("Привет, Nchat!", encryptor.decryptText(encrypted), encryptor.algorithmName());
         }
     }
 

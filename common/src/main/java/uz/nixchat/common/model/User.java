@@ -3,7 +3,7 @@ package uz.nixchat.common.model;
 import java.util.Objects;
 
 /**
- * A NixChat user. Two users are equal when their usernames are equal.
+ * A Nchat user. Two users are equal when their usernames are equal.
  */
 public class User {
 

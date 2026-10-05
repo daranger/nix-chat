@@ -118,8 +118,8 @@ class FeaturesTest {
     @Test
     void storeInstallRateAndSearch() {
         NixStore store = new NixStore();
-        store.publish(new MiniApp("ttt", "Tic-tac-toe", "NixChat Games", AppCategory.GAMES, "Play X and O in any chat"));
-        store.publish(new MiniApp("coin-bot", "Coin Bot", "NixChat Wallet", AppCategory.FINANCE, "Splits bills in NixCoin"));
+        store.publish(new MiniApp("ttt", "Tic-tac-toe", "Nchat Games", AppCategory.GAMES, "Play X and O in any chat"));
+        store.publish(new MiniApp("coin-bot", "Coin Bot", "Nchat Wallet", AppCategory.FINANCE, "Splits bills in NixCoin"));
 
         assertThrows(IllegalStateException.class, () -> store.rate(alice, "ttt", 5));
         assertTrue(store.install(alice, "ttt"));

@@ -5,7 +5,7 @@ import uz.nixchat.common.model.User;
 import java.time.Instant;
 
 /**
- * One NixCoin transfer. {@code from} is null for coins issued by NixChat (the welcome bonus).
+ * One NixCoin transfer. {@code from} is null for coins issued by Nchat (the welcome bonus).
  */
 public record Transaction(long id, User from, User to, long amount, String note, Instant at) {
 
@@ -16,7 +16,7 @@ public record Transaction(long id, User from, User to, long amount, String note,
     /** "+50 from @bob" or "−20 to @alice", as seen by the given user. */
     public String describeFor(User viewer) {
         if (to.equals(viewer)) {
-            String source = isBonus() ? "NixChat" : from.toString();
+            String source = isBonus() ? "Nchat" : from.toString();
             return "+" + amount + " NC from " + source;
         }
         return "−" + amount + " NC to " + to;

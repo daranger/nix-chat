@@ -18,7 +18,7 @@ import java.util.List;
  *   <li>{@code POST /api/phone/start {phone}} — send a code (Telegram or console in dev mode)</li>
  *   <li>{@code POST /api/phone/verify {code}} — link the number (only its hash is stored)</li>
  *   <li>{@code DELETE /api/phone} — unlink</li>
- *   <li>{@code POST /api/contacts/lookup {phoneKeys}} — which contacts use NixChat</li>
+ *   <li>{@code POST /api/contacts/lookup {phoneKeys}} — which contacts use Nchat</li>
  * </ul>
  */
 @RestController

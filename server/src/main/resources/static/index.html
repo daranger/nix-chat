@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NixChat Web (test client)</title>
+<title>Nchat Web (test client)</title>
 <style>
   :root {
     --bg: #0d1117; --panel: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e;
@@ -51,13 +51,13 @@
 <section id="login">
   <form class="card" id="authForm" autocomplete="on">
     <div class="logo" aria-hidden="true">N</div>
-    <h1 id="authTitle">Sign in to NixChat</h1>
+    <h1 id="authTitle">Sign in to Nchat</h1>
     <label>Username <input id="username" name="username" autocomplete="username" required minlength="3" maxlength="32"></label>
     <label id="displayNameRow" class="hidden">Display name (optional) <input id="displayName" maxlength="64"></label>
     <label>Password <input id="password" type="password" autocomplete="current-password" required minlength="8" maxlength="72"></label>
     <div class="error" id="authError" role="alert"></div>
     <button class="primary" id="authSubmit" type="submit">Sign in</button>
-    <button class="link" id="switchMode" type="button">New to NixChat? Create an account</button>
+    <button class="link" id="switchMode" type="button">New to Nchat? Create an account</button>
     <div class="note">Web test client · same accounts as the desktop app</div>
   </form>
 </section>
@@ -110,9 +110,9 @@
   // ---------- login screen ----------
   function setMode(register) {
     registerMode = register;
-    $('authTitle').textContent = register ? 'Create your NixChat account' : 'Sign in to NixChat';
+    $('authTitle').textContent = register ? 'Create your Nchat account' : 'Sign in to Nchat';
     $('authSubmit').textContent = register ? 'Create account' : 'Sign in';
-    $('switchMode').textContent = register ? 'Already have an account? Sign in' : 'New to NixChat? Create an account';
+    $('switchMode').textContent = register ? 'Already have an account? Sign in' : 'New to Nchat? Create an account';
     $('displayNameRow').classList.toggle('hidden', !register);
     $('password').autocomplete = register ? 'new-password' : 'current-password';
     $('authError').textContent = '';

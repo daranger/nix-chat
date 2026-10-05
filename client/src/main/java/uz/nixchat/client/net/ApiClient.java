@@ -28,7 +28,7 @@ public class ApiClient {
     public record LinkStarted(String maskedPhone, long expiresInSeconds) {
     }
 
-    /** A NixChat user found by phone. */
+    /** A Nchat user found by phone. */
     public record Match(String username, String displayName) {
     }
 
@@ -100,7 +100,7 @@ public class ApiClient {
                 .build());
     }
 
-    /** Sends phone keys (never numbers) and returns which of them belong to NixChat users. */
+    /** Sends phone keys (never numbers) and returns which of them belong to Nchat users. */
     public List<Match> lookup(String token, List<String> phoneKeys)
             throws IOException, InterruptedException, AuthException {
         JsonNode response = send(post("/api/contacts/lookup", Map.of("phoneKeys", phoneKeys), token));
