@@ -18,6 +18,13 @@ public class Contact {
     @Column(nullable = false, updatable = false)
     private LocalDate createdAt = LocalDate.now();
 
+    public Contact(Long ownerId, Long contactUserId, String alias) {
+    }
+
+    public Contact() {
+
+    }
+
     public Long getId() { return id; }
     public Long getOwnerId() { return ownerId; }
     public Long getContactUserId() { return contactUserId; }
