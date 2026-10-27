@@ -20,6 +20,8 @@ public class ConversationService {
 
     // Time complexity: O(log n). We do one indexed search, and if no chat exists
     // we do three inserts, each of which also costs O(log n).
+    // Space complexity: O(1). We create at most three small objects (one conversation
+    // and two members) and one DTO, no matter how many chats exist.
     // returns the existing private chat if there is one
     public ConversationDTO getOrCreatePrivate(Long userId, Long otherUserId) {
         // findPrivate looks for a chat shared by both users. With indexes on the
@@ -36,6 +38,8 @@ public class ConversationService {
 
     // Time complexity: O(m log n), where m is the number of member ids we receive.
     // We save one row per member, and each save costs O(log n).
+    // Space complexity: O(m). distinct() keeps a hash set of up to m ids. The members are
+    // saved one by one inside forEach, so we never store a second list of them.
     public ConversationDTO createGroup(String title, Long creatorId, List<Long> memberIds) {
         // One insert for the conversation and one for the creator: 2 * O(log n).
         Conversation c = conversationRepo.save(new Conversation(true, title));
@@ -54,6 +58,7 @@ public class ConversationService {
 
     // Time complexity: O(k log n), where k is the number of conversations the user is in.
     // The main cost is loading k conversations by id.
+    // Space complexity: O(k). We hold a list of k ids, then k conversations, then k DTOs.
     @Transactional(readOnly = true)
     public List<ConversationDTO> getUserConversations(Long userId) {
         // findByUserId uses the index on user id, which costs O(log n + k) to find and return
@@ -67,6 +72,7 @@ public class ConversationService {
     }
 
     // Time complexity: O(1). We only read four fields and create one object.
+    // Space complexity: O(1). We create a single DTO.
     private ConversationDTO toDTO(Conversation c) {
         return new ConversationDTO(c.getId(), c.isGroupChat(), c.getTitle(), c.getCreatedAt());
     }
@@ -83,7 +89,8 @@ public class ConversationService {
      * and three is a constant, so the total is still O(log n).
      *
      * createGroup():
-     * Two saves cost O(log n). Then distinct() and filter() each pass over m ids once,
+     * Two saves cost 2 * O(log n), which simplifies to O(log n) because constants are
+     * dropped in Big-O. Then distinct() and filter() each pass over m ids once,
      * which is O(m). Finally we save up to m members, and each save costs O(log n), so
      * this part is O(m log n). We add the parts: O(log n + m + m log n). The largest term
      * wins, so the result is O(m log n).
@@ -100,5 +107,23 @@ public class ConversationService {
      * Assumption: the O(log n) results are only true if the columns used in the queries
      * (user id, conversation id) are indexed. Without indexes, each search would scan the
      * whole table and cost O(n). Primary keys are always indexed.
+     *
+     * HOW WE DERIVED THE SPACE COMPLEXITY
+     *
+     * We counted the extra memory each method creates while it runs, not the database storage.
+     *
+     * getOrCreatePrivate():
+     * We create a fixed number of objects (one conversation, two members, one DTO), so O(1).
+     *
+     * createGroup():
+     * The only structure that grows is the hash set inside distinct(), which holds up to m
+     * ids. Members are saved one at a time and not collected, so the space is O(m).
+     *
+     * getUserConversations():
+     * We keep three collections of size k at the same time: the ids, the conversations and
+     * the DTOs. That is 3 * O(k), which simplifies to O(k) because constants are dropped.
+     *
+     * toDTO():
+     * It creates one object with four fields, so it is O(1).
      */
 }
