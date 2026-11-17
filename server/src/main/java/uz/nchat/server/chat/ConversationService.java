@@ -3,6 +3,10 @@ package uz.nchat.server.chat;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import uz.nchat.server.auth.UserAccountRepository;
+
 import java.util.List;
 
 @Service
@@ -11,11 +15,14 @@ public class ConversationService {
 
     private final ConversationRepository conversationRepo;
     private final ConversationMemberRepository memberRepo;
+    private final UserAccountRepository userRepo;
 
     public ConversationService(ConversationRepository conversationRepo,
-                               ConversationMemberRepository memberRepo) {
+                               ConversationMemberRepository memberRepo,
+                               UserAccountRepository userRepo) {
         this.conversationRepo = conversationRepo;
         this.memberRepo = memberRepo;
+        this.userRepo = userRepo;
     }
 
     // Time complexity: O(log n). We do one indexed search, and if no chat exists
@@ -24,6 +31,10 @@ public class ConversationService {
     // and two members) and one DTO, no matter how many chats exist.
     // returns the existing private chat if there is one
     public ConversationDTO getOrCreatePrivate(Long userId, Long otherUserId) {
+        if (userId.equals(otherUserId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot start a chat with yourself");
+        }
+        requireUser(otherUserId);
         // findPrivate looks for a chat shared by both users. With indexes on the
         // user and conversation columns, the database finds it in O(log n).
         return toDTO(conversationRepo.findPrivate(userId, otherUserId).orElseGet(() -> {
@@ -40,7 +51,19 @@ public class ConversationService {
     // We save one row per member, and each save costs O(log n).
     // Space complexity: O(m). distinct() keeps a hash set of up to m ids. The members are
     // saved one by one inside forEach, so we never store a second list of them.
+    /** Same as {@link #getOrCreatePrivate}, but the other person is given by username. */
+    public ConversationDTO getOrCreatePrivate(Long userId, String otherUsername) {
+        Long otherId = userRepo.findByUsername(otherUsername == null ? "" : otherUsername.strip().toLowerCase())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User @" + otherUsername + " not found"))
+            .getId();
+        return getOrCreatePrivate(userId, otherId);
+    }
+
     public ConversationDTO createGroup(String title, Long creatorId, List<Long> memberIds) {
+        if (title == null || title.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Group title is required");
+        }
+        memberIds.forEach(this::requireUser);
         // One insert for the conversation and one for the creator: 2 * O(log n).
         Conversation c = conversationRepo.save(new Conversation(true, title));
         memberRepo.save(new ConversationMember(c.getId(), creatorId));
@@ -73,6 +96,12 @@ public class ConversationService {
 
     // Time complexity: O(1). We only read four fields and create one object.
     // Space complexity: O(1). We create a single DTO.
+    private void requireUser(Long id) {
+        if (id == null || !userRepo.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User " + id + " not found");
+        }
+    }
+
     private ConversationDTO toDTO(Conversation c) {
         return new ConversationDTO(c.getId(), c.isGroupChat(), c.getTitle(), c.getCreatedAt());
     }

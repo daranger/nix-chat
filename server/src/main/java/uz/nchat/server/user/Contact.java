@@ -19,9 +19,12 @@ public class Contact {
     private LocalDate createdAt = LocalDate.now();
 
     public Contact(Long ownerId, Long contactUserId, String alias) {
+        this.ownerId = ownerId;
+        this.contactUserId = contactUserId;
+        this.alias = alias;
     }
 
-    public Contact() {
+    protected Contact() {
 
     }
 

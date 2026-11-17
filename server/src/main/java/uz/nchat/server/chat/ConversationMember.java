@@ -1,11 +1,9 @@
 package uz.nchat.server.chat;
 
 import jakarta.persistence.*;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Getter
 @Entity
 @Table(
     name = "conversation_members",
@@ -33,4 +31,9 @@ public class ConversationMember {
 
     protected ConversationMember() {
     }
+
+    public Long getId() { return id; }
+    public Long getConversationId() { return conversationId; }
+    public Long getUserId() { return userId; }
+    public LocalDateTime getJoinedAt() { return joinedAt; }
 }
