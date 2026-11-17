@@ -22,6 +22,6 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testRuntimeOnly("com.h2database:h2")
+    runtimeOnly("com.h2database:h2") // in-memory database for tests and the "local" profile (no Docker)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

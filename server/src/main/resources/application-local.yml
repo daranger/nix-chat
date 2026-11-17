@@ -1,0 +1,8 @@
+# Run without Docker: an in-memory H2 database instead of PostgreSQL.
+#   .\gradlew.bat :server:bootRun --args="--spring.profiles.active=local"
+# Accounts and messages are lost when the server stops.
+spring:
+  datasource:
+    url: jdbc:h2:mem:nchat;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""

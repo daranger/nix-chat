@@ -89,6 +89,11 @@ docker compose up -d
 ```
 This starts PostgreSQL (plus Redis for later milestones). The server creates its tables on first start.
 
+**No Docker?** Skip this step and start the server with an in-memory database instead (data is lost on restart):
+```bash
+./gradlew :server:bootRun --args="--spring.profiles.active=local"
+```
+
 ### 2. Build and test
 ```bash
 ./gradlew build
