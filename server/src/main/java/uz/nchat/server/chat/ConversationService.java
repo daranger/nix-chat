@@ -47,10 +47,11 @@ public class ConversationService {
         }));
     }
 
-    // Time complexity: O(m log n), where m is the number of member ids we receive.
-    // We save one row per member, and each save costs O(log n).
-    // Space complexity: O(m). distinct() keeps a hash set of up to m ids. The members are
-    // saved one by one inside forEach, so we never store a second list of them.
+    // Time complexity: O(log n). Finding the user by username uses the unique index on the
+    // username column (a B-tree), so it is O(log n). Then we call the method above, which is
+    // also O(log n). Two O(log n) steps one after another are still O(log n).
+    // Space complexity: O(1). We only create one cleaned username string (at most 32
+    // characters) and reuse the method above, which is O(1) too.
     /** Same as {@link #getOrCreatePrivate}, but the other person is given by username. */
     public ConversationDTO getOrCreatePrivate(Long userId, String otherUsername) {
         Long otherId = userRepo.findByUsername(otherUsername == null ? "" : otherUsername.strip().toLowerCase())
@@ -59,10 +60,16 @@ public class ConversationService {
         return getOrCreatePrivate(userId, otherId);
     }
 
+    // Time complexity: O(m log n), where m is the number of member ids we receive.
+    // We check that each member exists (m lookups by primary key, O(log n) each) and then
+    // save one row per member (each save is O(log n)). That is 2 * O(m log n) = O(m log n).
+    // Space complexity: O(m). distinct() keeps a hash set of up to m ids. The members are
+    // saved one by one inside forEach, so we never store a second list of them.
     public ConversationDTO createGroup(String title, Long creatorId, List<Long> memberIds) {
         if (title == null || title.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Group title is required");
         }
+        // requireUser does one primary-key lookup per id: m * O(log n) = O(m log n).
         memberIds.forEach(this::requireUser);
         // One insert for the conversation and one for the creator: 2 * O(log n).
         Conversation c = conversationRepo.save(new Conversation(true, title));
@@ -94,14 +101,16 @@ public class ConversationService {
         return conversationRepo.findAllById(ids).stream().map(this::toDTO).toList();
     }
 
-    // Time complexity: O(1). We only read four fields and create one object.
-    // Space complexity: O(1). We create a single DTO.
+    // Time complexity: O(log n). existsById searches the primary key index once.
+    // Space complexity: O(1). We create nothing except, on error, one exception object.
     private void requireUser(Long id) {
         if (id == null || !userRepo.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User " + id + " not found");
         }
     }
 
+    // Time complexity: O(1). We only read four fields and create one object.
+    // Space complexity: O(1). We create a single DTO.
     private ConversationDTO toDTO(Conversation c) {
         return new ConversationDTO(c.getId(), c.isGroupChat(), c.getTitle(), c.getCreatedAt());
     }

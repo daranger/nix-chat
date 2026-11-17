@@ -42,6 +42,10 @@ public class ApiClient {
         this.baseUrl = baseUrl;
     }
 
+    // Time complexity: O(1) on the client. We put three short fields into a map, turn it into
+    // JSON and send one HTTP request. The fields have fixed maximum lengths, so the work does
+    // not grow. The server then does O(log n) work (see AuthService.register()).
+    // Space complexity: O(1). One map with three entries, one JSON string and one Session.
     public Session register(String username, String displayName, String password)
             throws IOException, InterruptedException, AuthException {
         Map<String, String> body = new LinkedHashMap<>();
@@ -52,6 +56,9 @@ public class ApiClient {
         return toSession(response);
     }
 
+    // Time complexity: O(1) on the client, the same as register() but with two fields.
+    // The server does one indexed lookup, O(log n).
+    // Space complexity: O(1). One small map, one request and one Session.
     public Session login(String username, String password)
             throws IOException, InterruptedException, AuthException {
         Map<String, String> body = new LinkedHashMap<>();
